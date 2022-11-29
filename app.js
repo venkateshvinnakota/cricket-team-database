@@ -27,10 +27,21 @@ const initializeDBAndServer = async () => {
 
 initializeDBAndServer();
 
+const convertMovieDbObjectToResponseObject = (dbObject) => {
+  return {
+    playerId: dbObject.player_id,
+    playerName: dbObject.player_name,
+    jerseyNumber: dbObject.jersey_number,
+    role: dbObject.role,
+  };
+};
+
 app.get("/players/", async (request, response) => {
   const getCricketTeamQuery = `SELECT * FROM cricket_team ORDER BY player_id;`;
   const teamArray = await db.all(getCricketTeamQuery);
-  response.send(teamArray);
+  response.send(
+    teamArray.map((eachTeam) => convertMovieDbObjectToResponseObject(eachTeam))
+  );
 });
 
 app.post("/players/", async (request, response) => {
@@ -47,7 +58,7 @@ app.get("/players/:playerId", async (request, response) => {
   const { playerId } = request.params;
   const getPlayerQuery = `SELECT * FROM cricket_team WHERE player_id = ${playerId};`;
   const player = await db.get(getPlayerQuery);
-  response.send(player);
+  response.send(convertMovieDbObjectToResponseObject(player));
 });
 
 app.put("/players/:playerId", async (request, response) => {
@@ -67,3 +78,4 @@ app.delete("/players/:playerId", async (request, response) => {
 });
 
 module.exports = app;
+
